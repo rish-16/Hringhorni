@@ -28,7 +28,7 @@ my_grid = Hringhorni(n=15)
 my_grid.random_spawn(n_cells=30) # default is 10
 ```
 
-You can even specify the points on the grid you want live cells at. Follow this diagram for reference:
+You can even specify t points on the grid you want live cells at. Follow this diagram for reference:
 
 <img src="./assets/indexing.jpg" width=300>
 
@@ -141,7 +141,7 @@ s_0 = my_grid.raw_obs()
 all_states = [s_0] # starting with initial state at T=0
 
 T = 15
-for i in range(T)
+for i in range(T):
     state = grid.step()
     all_states.append(state)
 
