@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
@@ -11,7 +12,8 @@ class Hringhorni:
         self.grid = np.array([[0 for i in range(self.n)] for i in range(self.n)])
         
     def raw_obs(self):
-        return self.grid
+        grid = copy.deepcopy(self.grid)
+        return grid
         
     def display(self):
         for i in range(self.n):
@@ -26,7 +28,11 @@ class Hringhorni:
         
         return [state]
         
-    def random_spawn(self, n_cells=5):
+    def populate(self, coords):
+        for i in range(len(coords)):
+            self.grid[coords[i][1]][coords[i][0]] = 255
+        
+    def random_spawn(self, n_cells=10):
         count = 0
         while count != n_cells:
             x = np.random.randint(0, self.n)
@@ -51,29 +57,43 @@ class Hringhorni:
                 self.grid[i][j] = 0
                 
     def get_alive_neighbours(self, i, j):
-        neighbours = [[x2-1, y2-1] for x2 in range(j-1, j+2)
+        neighbours = [[x2, y2] for x2 in range(j-1, j+2)
                                for y2 in range(i-1, i+2)
-                               if (-1 < j <= self.n and
-                                   -1 < i <= self.n and
+                               if (-1 < j < self.n and
+                                   -1 < i < self.n and
                                    (j != x2 or i != y2) and
-                                   (0 <= x2 <= self.n) and
-                                   (0 <= y2 <= self.n))]                    
+                                   (0 <= x2 < self.n) and
+                                   (0 <= y2 < self.n))]                  
                                    
         n_alive_neighbours = 0                                   
         for i in range(len(neighbours)):
-            if self.grid[neighbours[i][0]][neighbours[i][1]] == 255:
+            if self.grid[neighbours[i][0]][neighbours[i][1]] == 255: # alive
                 n_alive_neighbours += 1
                                 
         return n_alive_neighbours
                 
     def step(self):
-        print ("Updating state")
-        
         for i in range(self.n):
             for j in range(self.n):
                 n_alive_neighbours = self.get_alive_neighbours(i, j)
                 self.judgement(i, j, n_alive_neighbours)
+                
+        state = copy.deepcopy(self.grid)
+        return state
         
+    def tstep_display(self, states, r, c):
+        T = len(states) - 1 # ignore first state
+        fig = plt.figure(1)
+        plt.tight_layout()
+        fig.suptitle("Cellular Automata for T = {}".format(T))
+        
+        for i in range(T):
+            plt.subplot(r, c, i+1)
+            plt.imshow(states[i], cmap="gray")
+            plt.title("T = {}".format(i))
+            plt.axis("off")
+
+        plt.show()        
                 
     def animate(self, frames):
         fig = plt.figure()
