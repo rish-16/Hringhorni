@@ -11,4 +11,4 @@ for i in range(T):
     state = my_grid.step()
     all_states.append(state)
 
-my_grid.tstep_display(all_states)
+my_grid.tstep_display(all_states, 3, 5)
