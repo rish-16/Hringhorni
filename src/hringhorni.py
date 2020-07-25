@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 
 class Hringhorni:
-    def __init__(self, n):
+    def __init__(self, n=8):
         self.grid = np.array([[0 for i in range(n)] for i in range(n)])
+        assert n >= 8, "size `n` should be 8 and above"
         self.n = n
         
     def reset(self):
@@ -35,8 +36,8 @@ class Hringhorni:
     def random_spawn(self, n_cells=10):
         count = 0
         while count != n_cells:
-            x = np.random.randint(0, self.n)
-            y = np.random.randint(0, self.n)
+            x = np.random.randint(0, self.n-1)
+            y = np.random.randint(0, self.n-1)
             
             if self.grid[x][y] == 0:
                 self.grid[x][y] = 255
@@ -44,17 +45,20 @@ class Hringhorni:
                 
     # cell spawning rules
     def judgement(self, i, j, n_neighbours):
-        if self.grid[i][j] == 0: # dead
-            if n_neighbours == 3: # reproduction
-                self.grid[i][j] = 255
+        new_val = 0
+        if self.grid[i][j] == 255: # alive
+            if n_neighbours in [2, 3]: # stable population
+                new_val = 255 
+            else: # overpopulation
+                new_val = 0
                 
-        elif self.grid[i][j] == 255: # alive
-            if n_neighbours < 2: # underpopulation
-                self.grid[i][j] = 0
-            elif n_neighbours in [2, 3]: # stable population
-                self.grid[i][j] = 255 
-            elif n_neighbours > 3: # overpopulation
-                self.grid[i][j] = 0
+        elif self.grid[i][j] == 0: # dead
+            if n_neighbours == 3: # reproduction
+                new_val = 255
+            else:
+                new_val = 0
+        
+        return new_val
                 
     def get_alive_neighbours(self, i, j):
         neighbours = [[x2, y2] for x2 in range(j-1, j+2)
@@ -73,13 +77,38 @@ class Hringhorni:
         return n_alive_neighbours
                 
     def step(self):
+        """
+        Get number of alive neighbours before spawning and killing cells
+        """
+        
+        new_config = [[0 for i in range(self.n)] for j in range(self.n)]
         for i in range(self.n):
             for j in range(self.n):
                 n_alive_neighbours = self.get_alive_neighbours(i, j)
-                self.judgement(i, j, n_alive_neighbours)
+                new_val = self.judgement(i, j, n_alive_neighbours)
+                new_config[i][j] = new_val
+                
+        self.grid = [[0 for i in range(self.n)] for j in range(self.n)]
+        for i in range(len(new_config)):
+            for j in range(len(new_config)):
+                self.grid[i][j] = new_config[i][j]
                 
         state = copy.deepcopy(self.grid)
         return state
+        
+    def set_shapes(self, shape_list):
+        for i in range(len(shape_list)):
+            cur_shape = shape_list[i]
+            
+            if cur_shape == "glider":
+                random_x = self.n // 2
+                random_y = self.n // 2
+                
+                self.grid[random_y][random_x-1] = 255
+                self.grid[random_y][random_x+1] = 255
+                self.grid[random_y-1][random_x+1] = 255
+                self.grid[random_y+1][random_x] = 255
+                self.grid[random_y+1][random_x+1] = 255
         
     def tstep_display(self, states, r, c):
         T = len(states) - 1 # ignore first state

@@ -151,6 +151,31 @@ grid.tstep_display(all_states)
 
 ---
 
+## Interesting Shapes
+
+You can even try simulating interesting shapes in `Hringhorni` using the `set_shapes` method that takes in a list of different shapes. Even if you want 
+
+<details>
+<summary><code>"glider"</code></summary>
+
+You can spawn a centrally-placed glider on the grid by adding `"glider"` to the list.
+
+```python
+from hringhorni import Hringhorni
+
+my_grid = Hringhorni(n=15)
+my_grid.set_shapes(["glider"])
+
+...
+```
+</details>
+
+<br>
+
+> More shapes to come!
+
+---
+
 ## License
 
 [MIT](https://github.com/rish-16/Hringhorni/blob/master/LICENSE)
